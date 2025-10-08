@@ -2,12 +2,13 @@ pipeline {
     agent any
 
     environment {
-        DOCKERHUB_USER = 'your_dockerhub_username'  // Replace with your Docker Hub username
+        DOCKERHUB_USER = 'shub7887'          // Replace with your Docker Hub username
         IMAGE_NAME = 'nodejs-ci-cd-demo'
         TAG = 'latest'
     }
 
     stages {
+        // ---------------- Checkout Stage ----------------
         stage('Checkout') {
             steps {
                 git(
@@ -17,12 +18,14 @@ pipeline {
             }
         }
 
+        // ---------------- Build Docker Image ----------------
         stage('Build Docker Image') {
             steps {
                 sh 'docker build -t $DOCKERHUB_USER/$IMAGE_NAME:$TAG .'
             }
         }
 
+        // ---------------- Push to DockerHub ----------------
         stage('Push to DockerHub') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
@@ -32,6 +35,7 @@ pipeline {
             }
         }
 
+        // ---------------- Run Docker Container ----------------
         stage('Run Container') {
             steps {
                 sh 'docker stop nodejs-ci-cd-demo || true'
@@ -45,7 +49,7 @@ pipeline {
         success {
             echo "✅ Deployment successful!"
             emailext (
-                to: 'you@example.com',  // Replace with your email
+                to: 'you@example.com',      // Replace with your email
                 subject: "Build Success: ${currentBuild.fullDisplayName}",
                 body: "Good news! The build succeeded."
             )
@@ -53,7 +57,7 @@ pipeline {
         failure {
             echo "❌ Build failed!"
             emailext (
-                to: 'you@example.com',  // Replace with your email
+                to: 'you@example.com',      // Replace with your email
                 subject: "Build Failed: ${currentBuild.fullDisplayName}",
                 body: "Oops! Something went wrong."
             )
